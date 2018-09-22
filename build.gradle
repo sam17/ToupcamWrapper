@@ -55,6 +55,6 @@ publishing {
 dependencies {
     compile 'org.slf4j:slf4j-api:1.7.12'
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.2.2'
-
+    compile fileTree("/Users/dementor/Downloads/opencv-3.2.0-unix/build/bin/opencv-320.jar")
     testCompile 'junit:junit:4.12'
 }

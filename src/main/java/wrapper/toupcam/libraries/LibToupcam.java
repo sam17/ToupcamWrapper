@@ -13,7 +13,7 @@ public interface LibToupcam extends Library {
 	int Toupcam_Enum(Pointer pointer);
 	
 	Pointer Toupcam_Open(String id);
-	
+
 	int Toupcam_StartPullModeWithCallback(Pointer handler, EventCallback callback, int other);
 	
 	int Toupcam_PullImage(Pointer handler, Pointer pImageData, int bits, Pointer pnWidth, Pointer pnHeight);
