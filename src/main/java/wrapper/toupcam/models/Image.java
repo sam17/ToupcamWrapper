@@ -1,10 +1,7 @@
 package wrapper.toupcam.models;
 
 import com.sun.jna.Pointer;
-
-import org.opencv.core.Mat;
 import wrapper.toupcam.enumerations.HResult;
-import wrapper.toupcam.util.Util;
 
 public class Image {
 

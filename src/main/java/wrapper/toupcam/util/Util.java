@@ -20,11 +20,9 @@ import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 
 import com.sun.jna.Pointer;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.Size;
 import wrapper.toupcam.models.ImageType;
-
-import static org.opencv.core.CvType.CV_8UC3;
 
 public class Util {
 
@@ -40,6 +38,21 @@ public class Util {
                 }
             }
         }).start();
+    }
+
+    public static Mat convertRGBImagePointerToMat(Pointer imagePointer, int height, int width) {
+        Mat mat = new Mat(height, width, CvType.CV_8UC3);
+        byte[] bytes = new byte[height * width * 3];
+        imagePointer.read(0, bytes, 0, height * width * 3);
+        mat.put(0, 0, bytes);
+        bytes = null;
+        return mat;
+    }
+
+    public static void clearBuffer(Pointer imagePointer, int expectedLength) {
+        byte[] bytes = new byte[expectedLength];
+        imagePointer.read(0, bytes, 0, expectedLength);
+        bytes = null;
     }
 
     public static void displayBytes(Pointer pointer) {

@@ -21,7 +21,6 @@ public class Constants {
     
     //public static final String PATH = "./src/main/resources/";
     public static final String IMAGES_PATH = PROJECT_BASE_PATH + "/capturedImages";
-    public static final String JAR_FILE_NAME = "ToupcamJavaWrapper.jar";
     public static final String NATIVE_LIB_EXTRACTION_DIR = PROJECT_BASE_PATH + "nativeLibs/";
     
     /**

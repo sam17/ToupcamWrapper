@@ -16,7 +16,6 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 import wrapper.toupcam.callbacks.BufferedImageStreamCallback;
 import wrapper.toupcam.callbacks.ByteImageStreamCallback;
 import wrapper.toupcam.callbacks.EventCallback;
@@ -34,7 +33,6 @@ import wrapper.toupcam.util.NativeUtils;
 import wrapper.toupcam.util.ParserUtil;
 import wrapper.toupcam.util.Util;
 
-import static org.opencv.core.CvType.CV_8UC3;
 import static org.opencv.core.CvType.CV_8UC4;
 
 public class App implements Toupcam {
@@ -42,6 +40,8 @@ public class App implements Toupcam {
 
     private LibToupcam libToupcam = null;
     private Pointer camHandler;
+    private static int counter = 0;
+
 
     private boolean isStreaming = false;
 
@@ -57,21 +57,21 @@ public class App implements Toupcam {
 
         App app = new App();
         Native.setProtected(true);
-        List<ToupcamInst> cams = app.getToupcams();    // some pointer issue in windows
-        System.out.println(cams);
+        //List<ToupcamInst> cams = app.getToupcams();    // some pointer issue in windows
+        //System.out.println(cams);
 
-        System.out.println(app.getResolutionNumbers());
-        System.out.println(app.getResolutions());
+        //System.out.println(app.getResolutionNumbers());
+        //System.out.println(app.getResolutions());
 
-        for (Resolution res : app.getResolutions())
-            System.out.println(res);
+//        for (Resolution res : app.getResolutions())
+//            System.out.println(res);
 
-        int camsConnected = app.countConnectedCams();
-        System.out.println(app.getToupcams());
-        if (camsConnected == 0) {
-            System.out.println("No Toupcams detected");
-            System.exit(-1);
-        }
+        //int camsConnected = app.countConnectedCams();
+        //System.out.println(app.getToupcams());
+//        if (camsConnected == 0) {
+//            System.out.println("No Toupcams detected");
+//            System.exit(-1);
+//        }
 
         //app.registerPlugInOrOut();        // not available in windows
         //app.camHandler = app.openCam(null);
@@ -79,38 +79,38 @@ public class App implements Toupcam {
 
         System.out.println("Set Resolution Result: " + app.setResolution(app.camHandler, 1));
 
-        ImageStreamCallback imageCallback = new BufferedImageStreamCallback() {
-            int imageCounter = 0;
-
-            @Override
-            public void onReceivePreviewImage(BufferedImage image, ImageHeader imageHeader) {
-                Native.setProtected(true);
-                byte[] imageBytes = Util.compressBufferedImageByteArray(image);
-                Util.writeImageToDisk(Util.compressBufferedImage(image));
-                try {
-                    Util.saveJPG(Util.compressBufferedImage(image));
-                } catch (IOException e) {
-
-                    e.printStackTrace();
-                }
-
-                System.out.println(imageHeader);
-                System.out.println("Total Images Received: " + ++imageCounter);
-            }
-
-            int stillCounter = 0;
-
-            @Override
-            public void onReceiveStillImage(BufferedImage image, ImageHeader imageHeader) {
-
-                try {
-                    ImageIO.write(image, "jpg", new File("./stills" + stillCounter++ + ".jpg"));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                System.out.println("Still Image: " + image);
-            }
-        };
+//        ImageStreamCallback imageCallback = new BufferedImageStreamCallback() {
+//            int imageCounter = 0;
+//
+//            @Override
+//            public void onReceivePreviewImage(BufferedImage image, ImageHeader imageHeader) {
+//                Native.setProtected(true);
+//                byte[] imageBytes = Util.compressBufferedImageByteArray(image);
+//                Util.writeImageToDisk(Util.compressBufferedImage(image));
+//                try {
+//                    Util.saveJPG(Util.compressBufferedImage(image));
+//                } catch (IOException e) {
+//
+//                    e.printStackTrace();
+//                }
+//
+//                System.out.println(imageHeader);
+//                System.out.println("Total Images Received: " + ++imageCounter);
+//            }
+//
+//            int stillCounter = 0;
+//
+//            @Override
+//            public void onReceiveStillImage(BufferedImage image, ImageHeader imageHeader) {
+//
+//                try {
+//                    ImageIO.write(image, "jpg", new File("./stills" + stillCounter++ + ".jpg"));
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//                System.out.println("Still Image: " + image);
+//            }
+//        };
 
         //app.startStreaming(imageCallback);
         //app.stopStreaming();
@@ -385,12 +385,17 @@ public class App implements Toupcam {
             public void invoke(Pointer imagePointer, Pointer imageMetaDataPointer, boolean isSnapshot) {
                 ImageHeader header = ParserUtil.parseImageHeader(imageMetaDataPointer);
                 System.out.println(header);
-                Util.writeImageToDisk(Util.convertImagePointerToImage(imagePointer,
-                        header.getWidth(), header.getHeight()));
-                Mat img = new Mat(new Size(header.getWidth(), header.getHeight()), CV_8UC4);
-                img.put(0, 0, Util.convertImagePointerToByteArray(imagePointer, header.getWidth(), header.getHeight(), ImageType.BGRA));
-                Imgcodecs.imwrite("hello.jpg", img);
-
+                Mat img = Util.convertRGBImagePointerToMat(imagePointer, header.getHeight(), header.getWidth());
+                Imgcodecs.imwrite("./capturedimages/image" + counter++ + ".jpg", img);
+                Util.clearBuffer(imagePointer, header.getWidth() * header.getHeight() * 3);
+                header = null;
+                img = null;
+                //Util.writeImageToDisk(Util.convertImagePointerToImage(imagePointer,
+                //header.getWidth(), header.getHeight()));
+                //Util.writeMatToDisk()
+                //Mat img = new Mat(new Size(header.getWidth(), header.getHeight()), CV_8UC4);
+                //img.put(0, 0, Util.convertImagePointerToByteArray(imagePointer, header.getWidth(), header.getHeight(), ImageType.BGRA));
+                //Imgcodecs.imwrite("/Users/dementor/morphle/scano/hello.jpg", img);
             }
         }, Pointer.NULL);
         return HResult.key(result);
